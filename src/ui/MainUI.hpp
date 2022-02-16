@@ -1,6 +1,3 @@
-#include <imgui.h>
-#include <backends/imgui_impl_sdl.h>
-#include <backends/imgui_impl_opengl3.h>
 
 #include <memory>
 #include <Window.hpp>
@@ -8,6 +5,7 @@
 #include <spdlog/sinks/ringbuffer_sink.h>
 
 #include <gfx/ShaderProgram.hpp>
+#include <SDL2/SDL.h>
 
 namespace ui
 {
@@ -17,6 +15,7 @@ namespace ui
         MainUI(std::shared_ptr<Window> window, std::shared_ptr<gfx::ShaderProgram> shaderProgram);
         ~MainUI();
 
+        void processSDLEvent(SDL_Event& event);
         void update();
         void render();
 

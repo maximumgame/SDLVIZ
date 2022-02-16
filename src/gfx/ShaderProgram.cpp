@@ -11,12 +11,12 @@ using namespace gfx;
 ShaderProgram::ShaderProgram(std::shared_ptr<Window> window)
 {
     m_window = window;
-    
     m_timeUniform = std::make_shared<gfx::shader::input::TimeUniform>();
     m_resolutionUniform = std::make_shared<gfx::shader::input::ResolutionUniform>(m_window);
 
-
+    spdlog::info("Before glUseProgram");
     m_program = glCreateProgram();
+    spdlog::info("Created shader program: {}", m_program);
 
     m_vertexShader = std::make_unique<gfx::shader::ShaderSource>(GL_VERTEX_SHADER, "#version 330\nin vec2 fragColor; void main() { gl_Position = vec4( fragColor.x, fragColor.y, 0, 1 ); }");
     m_fragmentShader = std::make_unique<gfx::shader::ShaderSource>(GL_FRAGMENT_SHADER, std::string

@@ -1,5 +1,10 @@
 #include <ui/MainUI.hpp>
 
+#include <imgui.h>
+#include <backends/imgui_impl_sdl.h>
+#include <backends/imgui_impl_opengl3.h>
+
+
 using namespace ui;
 
 MainUI::MainUI(std::shared_ptr<Window> window, std::shared_ptr<gfx::ShaderProgram> shaderProgram)
@@ -22,6 +27,11 @@ MainUI::~MainUI()
     ImGui::DestroyContext();
 
     spdlog::info("MainUI destroyed");
+}
+
+void MainUI::processSDLEvent(SDL_Event& event)
+{
+    ImGui_ImplSDL2_ProcessEvent(&event);
 }
 
 void MainUI::init()

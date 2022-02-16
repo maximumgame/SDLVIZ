@@ -16,20 +16,9 @@ set(IMGUI_SOURCES
 )
 
 add_library(${PROJECT_NAME} STATIC ${IMGUI_SOURCES})
-#target_compile_definitions(${PROJECT_NAME} PRIVATE -DIMGUI_IMPL_OPENGL_ES3)
 target_compile_definitions(${PROJECT_NAME} PRIVATE -DGL_GLES_PROTOTYPES)
 target_include_directories(${PROJECT_NAME} PUBLIC "${IMGUI_PATH}")
 target_include_directories(${PROJECT_NAME} PUBLIC "${IMGUI_PATH}/backends")
-
-
-#opengl
-find_package(OpenGL REQUIRED)
-target_include_directories(${PROJECT_NAME} PUBLIC ${OpenGL_INCLUDE_DIR})
-target_link_libraries(${PROJECT_NAME} PUBLIC OpenGL::GL OpenGL::GLU)
-
-#find_package(glad REQUIRED)
-#target_include_directories(${PROJECT_NAME} PUBLIC ${glad_INCLUDE_DIR})
-#target_link_libraries(${PROJECT_NAME} PUBLIC glad::glad)
 
 find_package(SDL2 REQUIRED sdl2)
 target_include_directories(${PROJECT_NAME} PRIVATE ${sdl2_INCLUDE_DIRS})
