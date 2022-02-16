@@ -1,6 +1,6 @@
 #pragma once
 #include <SDL2/SDL.h>
-#include <glad/glad.h>
+#include <gfx/gl.h>
 #include <memory>
 #include <gfx/BufferObject.hpp>
 #include <gfx/shader/ShaderSource.hpp>

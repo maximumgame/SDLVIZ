@@ -1,5 +1,5 @@
 #pragma once
-#include <glad/glad.h>
+#include <gfx/gl.h>
 
 namespace gfx
 {
@@ -20,6 +20,7 @@ namespace gfx
         BufferObject &operator=(BufferObject &&other) noexcept
         {
             Reset(other.Release());
+            return *this;
         }
 
         //Deletes buffer from gpu

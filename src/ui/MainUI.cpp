@@ -43,7 +43,7 @@ void MainUI::init()
     (void)io;
     ImGui::StyleColorsDark();
     ImGui_ImplSDL2_InitForOpenGL(m_window->getWindow(), m_window->getContext());
-    ImGui_ImplOpenGL3_Init("#version 330");
+    ImGui_ImplOpenGL3_Init("#version 300 es");
 }
 
 static int BufferResizeCallback(ImGuiInputTextCallbackData* data)
@@ -66,7 +66,8 @@ void MainUI::update()
     { //main frame
         ImGui::Begin("Main");
         ImGui::Text("Framerate %.1f FPS", ImGui::GetIO().Framerate);
-        static std::string shaderText = {"#version 330\n"
+        static std::string shaderText = {"#version 300 es\n"
+                                         "precision mediump float;\n"
                                          "out vec4 fragColor;\n"
                                          "uniform float iTime;\n"
                                          "uniform vec3 iResolution;\n"

@@ -1,5 +1,5 @@
 #pragma once
-#include <glad/glad.h>
+#include <gfx/gl.h>
 #include <memory>
 #include <spdlog/spdlog.h>
 
@@ -35,6 +35,7 @@ namespace gfx::shader
         ShaderSource &operator=(ShaderSource &&other) noexcept
         {
             Reset(other.Release());
+            return *this;
         }
 
         GLuint Release()

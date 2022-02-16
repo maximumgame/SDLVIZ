@@ -72,11 +72,6 @@ endif()
 target_include_directories(${PROJECT_NAME} PUBLIC ${imgui_INCLUDE_DIR})
 target_link_libraries(${PROJECT_NAME} PUBLIC imgui)
 
-
-add_subdirectory(lib/gladloader)
-target_include_directories(${PROJECT_NAME} PUBLIC ${GLADLOADER_INCLUDE_DIR})
-target_link_libraries(${PROJECT_NAME} PUBLIC gladloader)
-
 if(UNIX)
   target_link_libraries(${PROJECT_NAME} PUBLIC ${CMAKE_DL_LIBS})
 endif()
@@ -90,9 +85,16 @@ else()
   set(ISEM FALSE)
 endif()
 
+#glad loader is only for desktop
+if(NOT ISEM)
+  add_subdirectory(lib/gladloader)
+  target_include_directories(${PROJECT_NAME} PUBLIC ${GLADLOADER_INCLUDE_DIR})
+  target_link_libraries(${PROJECT_NAME} PUBLIC gladloader)
+endif()
 
 if(ISEM)
-  target_link_options(${PROJECT_NAME} PUBLIC "-s USE_SDL=2 -s WASM=1 -s FULL_ES2=1 -s FULL_ES3=1")
+  target_link_options(${PROJECT_NAME} PUBLIC "-s USE_SDL=2 -s WASM=1 -s FULL_ES2=1 -s FULL_ES3=1 -s USE_WEBGL2=1 -s ENVIRONMENT=web -s MIN_WEBGL_VERSION=3 -s MAX_WEBGL_VERSION=3 --profiling")
+  message(STATUS " * Linking with Emscripten flags: -s USE_SDL=2 -s WASM=1 -s FULL_ES2=1 -s FULL_ES3=1 -s USE_WEBGL2=1 -s ENVIRONMENT=web -s MIN_WEBGL_VERSION=3 -s MAX_WEBGL_VERSION=3")
   set(CMAKE_EXECUTABLE_SUFFIX ".html")
-  message(STATUS " * Emscripten build")
+  message(STATUS " * Emscripten building html")
 endif()

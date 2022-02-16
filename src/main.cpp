@@ -7,20 +7,27 @@
 
 #include <ui/MainUI.hpp>
 
-#include <glad/glad.h>
-
 #include <SDL2/SDL_opengl.h>
 #include <iostream>
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
+#include <emscripten/html5_webgl.h>
 #endif
 
 
 bool initGl()
 {
-    //if we are emscripten, rely on em's gl loader
-#ifndef __EMSCRIPTEN__
+    //if we are emscripten, rely on em's gl defs
+#ifdef __EMSCRIPTEN__
+    EmscriptenWebGLContextAttributes attr;
+    emscripten_webgl_init_context_attributes(&attr);
+    attr.majorVersion = 2;
+    attr.minorVersion = 0;
+    auto context = emscripten_webgl_create_context("canvas", &attr);
+    emscripten_webgl_make_context_current(context);
+    spdlog::info("Created emscripten webgl context");
+#else
     int error = gladLoadGL();
     spdlog::info("GLAD init: {}", error);
 #endif
@@ -32,21 +39,6 @@ bool initGl()
     }
 
     return true;
-}
-
-void glSetup()
-{
-    //enable alpha blending
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    //enable depth testing
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LEQUAL);
-
-    //enable backface culling
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
 }
 
 std::function<void()> glLoop;
@@ -64,25 +56,18 @@ int main()
     auto result = initGl();
     if(!result)
     {
-        spdlog::error("Failed to initialize GLAD");
+        spdlog::error("Failed to initialize GL");
         return -1;
     }
-
-    std::shared_ptr<gfx::ShaderProgram> shader_program(new gfx::ShaderProgram(main_window));
-
-    spdlog::info("Shader program created");
-
-    SDL_GL_MakeCurrent(main_window->getWindow(), main_window->getContext());
-    spdlog::info("SDL_GL_MakeCurrent");
-
-
     spdlog::info("OpenGL version: {}", glGetString(GL_VERSION));
     spdlog::info("GLSL version: {}", glGetString(GL_SHADING_LANGUAGE_VERSION));
     spdlog::info("Vendor: {}", glGetString(GL_VENDOR));
     spdlog::info("Renderer: {}", glGetString(GL_RENDERER));
-    
 
-    spdlog::info("Starting main loop...");
+    std::shared_ptr<gfx::ShaderProgram> shader_program(new gfx::ShaderProgram(main_window));
+    spdlog::info("Shader program created");
+
+    SDL_GL_MakeCurrent(main_window->getWindow(), main_window->getContext());
 
     std::unique_ptr<ui::MainUI> main_ui(new ui::MainUI(main_window, shader_program));
 
@@ -119,6 +104,7 @@ int main()
         }
     };
 
+    spdlog::info("Starting main loop...");
 #ifdef __EMSCRIPTEN__
     emscripten_set_main_loop(EmLoop, 0, true);
 #else

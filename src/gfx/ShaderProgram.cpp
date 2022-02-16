@@ -14,13 +14,12 @@ ShaderProgram::ShaderProgram(std::shared_ptr<Window> window)
     m_timeUniform = std::make_shared<gfx::shader::input::TimeUniform>();
     m_resolutionUniform = std::make_shared<gfx::shader::input::ResolutionUniform>(m_window);
 
-    spdlog::info("Before glUseProgram");
     m_program = glCreateProgram();
-    spdlog::info("Created shader program: {}", m_program);
 
-    m_vertexShader = std::make_unique<gfx::shader::ShaderSource>(GL_VERTEX_SHADER, "#version 330\nin vec2 fragColor; void main() { gl_Position = vec4( fragColor.x, fragColor.y, 0, 1 ); }");
+    m_vertexShader = std::make_unique<gfx::shader::ShaderSource>(GL_VERTEX_SHADER, "#version 300 es\nin vec2 fragColor; void main() { gl_Position = vec4( fragColor.x, fragColor.y, 0, 1 ); }");
     m_fragmentShader = std::make_unique<gfx::shader::ShaderSource>(GL_FRAGMENT_SHADER, std::string
-                                                                                                    {"#version 330\n"
+                                                                                                    {"#version 300 es\n"
+                                                                                                    "precision mediump float;\n"
                                                                                                     "out vec4 fragColor;\n"
                                                                                                     "uniform float iTime;\n"
                                                                                                     "uniform vec3 iResolution;\n"
@@ -31,6 +30,18 @@ ShaderProgram::ShaderProgram(std::shared_ptr<Window> window)
                                                                                                     "    fragColor = vec4(color, 1);\n"
                                                                                                     "}\n"});
     
+    if(!m_vertexShader->ShaderSuccess())
+    {
+        spdlog::error("Vertex shader failed to compile {}", m_vertexShader->GetShaderLog().get());
+        throw std::runtime_error("Vertex shader failed to compile");
+    }
+
+    if(!m_fragmentShader->ShaderSuccess())
+    {
+        spdlog::error("Fragment shader failed to compile {}", m_fragmentShader->GetShaderLog().get());
+        throw std::runtime_error("Fragment shader failed to compile");
+    }
+
     glAttachShader(m_program, m_vertexShader->GetShader());
     glAttachShader(m_program, m_fragmentShader->GetShader());
 
@@ -46,13 +57,13 @@ ShaderProgram::ShaderProgram(std::shared_ptr<Window> window)
     glGetProgramiv(m_program, GL_LINK_STATUS, &programSuccess);
     if(programSuccess != GL_TRUE)
     {
-        throw std::runtime_error("Failed to link shader program");
+        throw std::runtime_error("Failed to link default shader program");
     }
 
     m_gVertexPos2DLocation = glGetAttribLocation(m_program, "fragColor");
     if(m_gVertexPos2DLocation == -1)
     {
-        throw std::runtime_error("Failed to get location of fragColor");
+        throw std::runtime_error("Failed to get location of fragColor attribute");
     }
 
     typedef struct VertexData_S {
@@ -81,7 +92,7 @@ std::shared_ptr<GLchar[]> ShaderProgram::LinkNewFragmentShader(const std::string
 {
     GLuint newProgram = glCreateProgram();
     
-    auto tempVertexShader = std::make_shared<gfx::shader::ShaderSource>(GL_VERTEX_SHADER, "#version 140\nin vec2 fragColor; void main() { gl_Position = vec4( fragColor.x, fragColor.y, 0, 1 ); }");
+    auto tempVertexShader = std::make_shared<gfx::shader::ShaderSource>(GL_VERTEX_SHADER, "#version 300 es\nin vec2 fragColor; void main() { gl_Position = vec4( fragColor.x, fragColor.y, 0, 1 ); }");
     auto tempFragmentShader = std::make_shared<gfx::shader::ShaderSource>(GL_FRAGMENT_SHADER, shaderSource);
 
     if(!tempVertexShader->ShaderSuccess())
