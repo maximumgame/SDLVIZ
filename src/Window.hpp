@@ -9,13 +9,13 @@ public:
     void createWindow();
     SDL_Window* getWindow() { return window; };
     SDL_GLContext getContext() { return glcontext; };
-    int getWidth() { return m_width; };
-    int getHeight() { return m_height; };
+    const int* getWidth() { return &m_width; };
+    const int* getHeight() { return &m_height; };
+    
+protected:
 
     int m_width;
     int m_height;
-protected:
-
     SDL_Window* window;
     SDL_GLContext glcontext;
 

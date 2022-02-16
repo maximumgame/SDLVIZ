@@ -50,8 +50,8 @@ void glSetup()
 int main()
 {
     std::shared_ptr<Window> main_window(new Window());
-    int width = main_window->getWidth();
-    int height = main_window->getHeight();
+    int width = *main_window->getWidth();
+    int height = *main_window->getHeight();
     
     auto result = initGl();
     if(!result)

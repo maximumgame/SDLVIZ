@@ -19,7 +19,7 @@ namespace gfx::shader::input
         {
             GLint uniformLoc = glGetUniformLocation(program, "iResolution");
             if(uniformLoc != -1)
-                glUniform3f(uniformLoc, m_window->m_width, m_window->m_height, 1.f);
+                glUniform3f(uniformLoc, *m_window->getWidth(), *m_window->getHeight(), 1.f);
         }
     private:
         std::shared_ptr<Window> m_window;

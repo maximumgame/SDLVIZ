@@ -13,8 +13,12 @@ namespace {
                 switch(event->window.event)
                 {
                     case SDL_WINDOWEVENT_RESIZED:
-                        window->m_width = event->window.data1;
-                        window->m_height = event->window.data2;
+                        //hax
+                        int* width = const_cast<int*>(window->getWidth());
+                        int* height = const_cast<int*>(window->getHeight());
+
+                        *height = event->window.data1;
+                        *width = event->window.data2;
                         break;
                 }
                 break;
