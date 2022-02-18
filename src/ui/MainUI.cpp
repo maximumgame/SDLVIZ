@@ -7,6 +7,70 @@
 
 using namespace ui;
 
+const std::string singridshader = {
+"#version 300 es\n"
+"\n"
+"precision mediump float;\n"
+"out vec4 fragColor;\n"
+"uniform float iTime;\n"
+"uniform vec3 iResolution;\n"
+"\n"
+"float q(vec2 pos,float angle){\n"
+"    return pos.x * cos(angle) + pos.y * sin(angle);\n"
+"}\n"
+"\n"
+"float pi=atan(1.0,0.0)*2.0;\n"
+"\n"
+"float Hexagon(vec2 pos, float time){\n"
+"    float c0 = 0.0;\n"
+"    float c2 = 2.0;\n"
+"    float c3 = 3.0;\n"
+"    \n"
+"    float c = cos(q(pos, pi / c3));\n"
+"    c += cos(q(pos, c0));\n"
+"    c += cos(q(pos, time + pi / c3));\n"
+"    c += cos(q(pos, time + c0));\n"
+"    c += cos(q(pos, pi / c3 * c2));\n"
+"    c += cos(q(pos, time + pi / c3 * c2));\n"
+"    \n"
+"    \n"
+"    float distanceToCenter = sqrt((pos.x * pos.x) + (pos.y * pos.y));\n"
+"    return c;\n"
+"}\n"
+"\n"
+"vec3 HexagonColor(float hex, vec2 uv, float time, float duv){\n"
+"    float f = dot(uv, uv);\n"
+"    float distanceToCenter = sqrt((uv.x * uv.x) + (uv.y * uv.y));\n"
+"    vec3 col = 0.5 + 0.5 * cos(time + hex + uv.xyx + vec3(0, 2, 4));\n"
+"    \n"
+"    return col;\n"
+"}\n"
+"\n"
+"void main()\n"
+"{\n"
+"    vec2 UV = gl_FragCoord.xy/iResolution.xy-.5;\n"
+"    float duv= dot(UV, UV);\n"
+"    \n"
+"    // Normalized pixel coordinates (from 0 to 1)\n"
+"    vec2 uv = gl_FragCoord.xy / iResolution.xy;\n"
+"    vec2 pos = (uv - vec2(0.5)) * iResolution.xy / iResolution.y * 200.0;\n"
+"    \n"
+"    float time = iTime / 15.0;\n"
+"    \n"
+"    float angle = atan(pos.y, pos.x) + time;\n"
+"    pos = length(pos) * vec2(cos(angle), sin(angle));\n"
+"    \n"
+"    //time = 0.0;\n"
+"    float hex = Hexagon(pos, time);\n"
+"    \n"
+"    // Time varying pixel color\n"
+"    vec3 col = HexagonColor(hex, uv, time, duv);\n"
+"\n"
+"    // Output to screen\n"
+"    fragColor = vec4(col * (-hex), 1.0);\n"
+"}\n"
+};
+
 MainUI::MainUI(std::shared_ptr<Window> window, std::shared_ptr<gfx::ShaderProgram> shaderProgram)
 {
     this->m_window = window;
@@ -49,6 +113,12 @@ void MainUI::init()
     ImGuiIO& io = ImGui::GetIO();
     (void)io;
 
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+
+#ifndef __EMSCRIPTEN__
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+
     io.SetClipboardTextFn = [](void* user_data, const char* text)
     {
         SDL_SetClipboardText(text);
@@ -59,7 +129,8 @@ void MainUI::init()
         const char* text = SDL_GetClipboardText();
         return text;
     };
-    
+#endif
+
     ImGui::StyleColorsDark();
     ImGui_ImplSDL2_InitForOpenGL(m_window->getWindow(), m_window->getContext());
     ImGui_ImplOpenGL3_Init("#version 300 es");
@@ -70,7 +141,7 @@ static int BufferResizeCallback(ImGuiInputTextCallbackData* data)
     if (data->EventFlag == ImGuiInputTextFlags_CallbackResize)
     {
         std::string* buf = (std::string*)data->UserData;
-        buf->resize(data->BufTextLen + 10);
+        buf->resize(data->BufTextLen + 1000);
         return 0;
     }
     return 1;
@@ -109,7 +180,7 @@ bool MainUI::Update()
         ImGui::Separator();
         ImGui::BeginChild("##ShaderWindow", ImVec2(0, 490), ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_AlwaysAutoResize);
         //resize our string as needed
-        ImGui::InputTextMultiline("Shader", (char*)shaderText.c_str(), shaderText.size(), ImVec2(0, 470), ImGuiInputTextFlags_CallbackResize | ImGuiWindowFlags_AlwaysAutoResize, BufferResizeCallback, &shaderText);
+        ImGui::InputTextMultiline("Shader", (char*)shaderText.c_str(), shaderText.size(), ImVec2(0, 470), ImGuiInputTextFlags_CallbackResize | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_AlwaysUseWindowPadding, BufferResizeCallback, &shaderText);
         ImGui::SameLine();
         if(ImGui::Button("Compile"))
         {
@@ -118,6 +189,14 @@ bool MainUI::Update()
                 m_logger->error("Compile error: {}", err.get());
             else
                 m_logger->info("Compile successful");
+        }
+        ImGui::SameLine();
+        if(ImGui::Button("Load Sin-Grid shader"))
+        {
+            shaderText.resize(singridshader.length() + 1);
+            singridshader.copy(&shaderText[0], singridshader.length());
+
+            m_shaderProgram->LinkNewFragmentShader(shaderText);
         }
         ImGui::EndChild();
 
@@ -147,5 +226,13 @@ void MainUI::render()
     {
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+        auto& io = ImGui::GetIO();
+        if(io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        {
+            ImGui::UpdatePlatformWindows();
+            ImGui::RenderPlatformWindowsDefault();
+            SDL_GL_MakeCurrent(m_window->getWindow(), m_window->getContext());
+        }
     }
 }
