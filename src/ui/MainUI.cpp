@@ -48,6 +48,18 @@ void MainUI::init()
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
     (void)io;
+
+    io.SetClipboardTextFn = [](void* user_data, const char* text)
+    {
+        SDL_SetClipboardText(text);
+    };
+
+    io.GetClipboardTextFn = [](void* user_data)
+    {
+        const char* text = SDL_GetClipboardText();
+        return text;
+    };
+    
     ImGui::StyleColorsDark();
     ImGui_ImplSDL2_InitForOpenGL(m_window->getWindow(), m_window->getContext());
     ImGui_ImplOpenGL3_Init("#version 300 es");
