@@ -93,8 +93,15 @@ if(NOT ISEM)
 endif()
 
 if(ISEM)
-  target_link_options(${PROJECT_NAME} PUBLIC "-s USE_SDL=2 -s WASM=1 -s FULL_ES2=1 -s FULL_ES3=1 -s USE_WEBGL2=1 -s ENVIRONMENT=web -s MIN_WEBGL_VERSION=3 -s MAX_WEBGL_VERSION=3 --profiling")
-  message(STATUS " * Linking with Emscripten flags: -s USE_SDL=2 -s WASM=1 -s FULL_ES2=1 -s FULL_ES3=1 -s USE_WEBGL2=1 -s ENVIRONMENT=web -s MIN_WEBGL_VERSION=3 -s MAX_WEBGL_VERSION=3")
+  set(EM_FLAGS "-s FULL_ES2=1 -s FULL_ES3=1 -s USE_SDL=2 -s WASM=1 -s ENVIRONMENT=web -s ALLOW_MEMORY_GROWTH=1 -s TOTAL_STACK=32mb -s INITIAL_MEMORY=128mb")
+  target_link_options(${PROJECT_NAME} PUBLIC ${EM_FLAGS})
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EM_FLAGS}")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EM_FLAGS}")
   set(CMAKE_EXECUTABLE_SUFFIX ".html")
+  message(STATUS " * Linking with Emscripten flags: ${EM_FLAGS}")
   message(STATUS " * Emscripten building html")
+
+  #add dockerfile and other files
+  file(COPY resources/Dockerfile DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+  file(COPY resources/index.html DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 endif()

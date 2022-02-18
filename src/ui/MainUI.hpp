@@ -16,10 +16,10 @@ namespace ui
         ~MainUI();
 
         void processSDLEvent(SDL_Event& event);
-        void update();
         void render();
 
     protected:
+        bool Update();
         void init();
 
     private:

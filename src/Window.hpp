@@ -19,5 +19,12 @@ protected:
     SDL_Window* window;
     SDL_GLContext glcontext;
 
+#ifdef __EMSCRIPTEN__
+    int m_emContext;
+public:
+    int GetEMContext() const { return m_emContext; };
+protected:
+    
+#endif
 
 };

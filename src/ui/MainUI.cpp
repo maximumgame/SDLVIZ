@@ -31,7 +31,14 @@ MainUI::~MainUI()
 
 void MainUI::processSDLEvent(SDL_Event& event)
 {
-    ImGui_ImplSDL2_ProcessEvent(&event);
+    try
+    {
+        ImGui_ImplSDL2_ProcessEvent(&event);
+    }
+    catch(std::exception e)
+    {
+        m_logger->error(e.what());
+    }
 }
 
 void MainUI::init()
@@ -57,13 +64,23 @@ static int BufferResizeCallback(ImGuiInputTextCallbackData* data)
     return 1;
 }
 
-void MainUI::update()
+bool MainUI::Update()
 {
+    //this only seems to be an issue under emscripten
+    #ifdef __EMSCRIPTEN__
+    if(ImGui::GetFrameCount() == 0)
+    {
+        spdlog::error("ImGui framerate is invalid {}", ImGui::GetIO().DeltaTime);
+        //return false;
+    }
+    #endif
+
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL2_NewFrame(m_window->getWindow());
     ImGui::NewFrame();
 
     { //main frame
+        ImGui::SetNextWindowSize(ImVec2(800, 600), ImGuiCond_FirstUseEver);
         ImGui::Begin("Main");
         ImGui::Text("Framerate %.1f FPS", ImGui::GetIO().Framerate);
         static std::string shaderText = {"#version 300 es\n"
@@ -108,10 +125,15 @@ void MainUI::update()
 
         ImGui::End();
     }
+    return true;
 }
 
 void MainUI::render()
 {
-    ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    bool result = this->Update();
+    if(result)
+    {
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    }
 }
