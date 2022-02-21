@@ -153,7 +153,7 @@ bool MainUI::Update()
     #ifdef __EMSCRIPTEN__
     if(ImGui::GetFrameCount() == 0)
     {
-        spdlog::error("ImGui framerate is invalid {}", ImGui::GetIO().DeltaTime);
+        spdlog::error("ImGui framerate is invalid {}", ImGui::GetIO().Framerate);
         //return false;
     }
     #endif
