@@ -61,19 +61,19 @@ add_executable(${PROJECT_NAME} ${SRCS} ${HEADERS})
 
 #find package sdl2
 find_package(SDL2 REQUIRED sdl2)
-target_include_directories(${PROJECT_NAME} PUBLIC ${sdl2_INCLUDE_DIRS})
-target_link_libraries(${PROJECT_NAME} PUBLIC SDL2::SDL2)
+target_include_directories(${PROJECT_NAME} PRIVATE ${sdl2_INCLUDE_DIRS})
+target_link_libraries(${PROJECT_NAME} PRIVATE SDL2::SDL2)
 
 find_package(imgui CONFIG)
 if(NOT ${imgui_FOUND})
   message(" * imgui not found, adding subdirectory lib/imgui")
   add_subdirectory(lib/imgui)
 endif()
-target_include_directories(${PROJECT_NAME} PUBLIC ${imgui_INCLUDE_DIR})
-target_link_libraries(${PROJECT_NAME} PUBLIC imgui)
+target_include_directories(${PROJECT_NAME} PRIVATE ${imgui_INCLUDE_DIR})
+target_link_libraries(${PROJECT_NAME} PRIVATE imgui)
 
 if(UNIX)
-  target_link_libraries(${PROJECT_NAME} PUBLIC ${CMAKE_DL_LIBS})
+  target_link_libraries(${PROJECT_NAME} PRIVATE ${CMAKE_DL_LIBS})
 endif()
 
 if(CMAKE_CXX_COMPILER MATCHES "/em\\+\\+(-[a-zA-Z0-9.])?$")
