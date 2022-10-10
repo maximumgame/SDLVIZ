@@ -2,6 +2,8 @@
 #include <spdlog/spdlog.h>
 #include <stdexcept>
 
+#include <gfx/gl.h>
+
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #include <emscripten/html5_webgl.h>
@@ -87,6 +89,11 @@ void Window::createWindow()
     
 #ifndef __EMSCRIPTEN__
     glcontext = SDL_GL_CreateContext(window);
+    // if(glGetError() != GL_NO_ERROR)
+    // {
+    //     spdlog::error("Error initing glcontext");
+    // }
+    SDL_GL_MakeCurrent(window, glcontext);
 #else
     emscripten_webgl_make_context_current(m_emContext);
 #endif

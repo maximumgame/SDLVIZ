@@ -20,7 +20,7 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE -DGL_GLES_PROTOTYPES)
 target_include_directories(${PROJECT_NAME} PUBLIC "${IMGUI_PATH}")
 target_include_directories(${PROJECT_NAME} PUBLIC "${IMGUI_PATH}/backends")
 
-find_package(SDL2 REQUIRED sdl2)
+find_package(SDL2 CONFIG REQUIRED sdl2)
 target_include_directories(${PROJECT_NAME} PRIVATE ${sdl2_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} PRIVATE SDL2::SDL2)
 

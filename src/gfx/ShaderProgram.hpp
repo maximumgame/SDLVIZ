@@ -34,7 +34,7 @@ namespace gfx
 
         //vertex array object
         GLuint m_vao;
-        //vertex array object
+        //vertex buffer object
         std::shared_ptr<gfx::BufferObject> m_vbo;
         //element buffer object
         std::shared_ptr<gfx::BufferObject> m_ebo;

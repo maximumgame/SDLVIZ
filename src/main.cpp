@@ -16,15 +16,18 @@
 #endif
 
 
-bool initGl()
+int initGl()
 {
-    //if we are emscripten, rely on em's gl defs
+    //if we are not emscripten load glad extensions
+    int error = 1;
 #ifndef __EMSCRIPTEN__
-    int error = gladLoadGL();
+    //int error = gladLoadGL();
+    error = gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress);
     spdlog::info("GLAD init: {}", error);
+    spdlog::info("OpenGL {}.{}", GLVersion.major, GLVersion.minor);
 #endif
 
-    return true;
+    return error;
 }
 
 std::function<void()> glLoop;
@@ -39,8 +42,8 @@ int main()
     int width = *main_window->getWidth();
     int height = *main_window->getHeight();
 
-    auto result = initGl();
-    if(!result)
+    auto errorResult = initGl();
+    if(!errorResult)
     {
         spdlog::error("Failed to initialize GL");
         return -1;
@@ -54,10 +57,6 @@ int main()
     std::shared_ptr<gfx::ShaderProgram> shader_program(new gfx::ShaderProgram(main_window));
     spdlog::info("Shader program created");
 
-    //SDL_GL_MakeCurrent(main_window->getWindow(), main_window->getContext());
-    //spdlog::info("GL sdl gl made current");
-
-
     std::unique_ptr<ui::MainUI> main_ui(new ui::MainUI(main_window, shader_program));
 
     glLoop = [&]
@@ -65,13 +64,11 @@ int main()
         #ifdef __EMSCRIPTEN__
         emscripten_webgl_make_context_current(main_window->GetEMContext());
         #endif
-        //main loop
         
         SDL_Event event;
         //handle events
         while(SDL_PollEvent(&event))
         {
-            //ImGui_ImplSDL3_ProcessEvent(&event);
             main_ui->processSDLEvent(event);
             if(event.type == SDL_QUIT)
             {
@@ -101,8 +98,6 @@ int main()
         glLoop();
     }
 #endif
-
-    
 
     spdlog::info("Exiting main loop...");
     return 0;
