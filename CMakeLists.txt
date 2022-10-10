@@ -59,8 +59,12 @@ include_directories(lib/spdlog/include) #add spdlog
 
 add_executable(${PROJECT_NAME} ${SRCS} ${HEADERS})
 
+if(UNIX)
+  INCLUDE(FindPkgConfig)
+endif()
+
 #find package sdl2
-find_package(SDL2 REQUIRED sdl2)
+find_package(SDL2 CONFIG REQUIRED sdl2)
 target_include_directories(${PROJECT_NAME} PRIVATE ${sdl2_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} PRIVATE SDL2::SDL2)
 
@@ -93,7 +97,7 @@ if(NOT ISEM)
 endif()
 
 if(ISEM)
-  set(EM_FLAGS "-s FULL_ES2=1 -s FULL_ES3=1 -s USE_SDL=2 -s WASM=1 -s ENVIRONMENT=web -s ALLOW_MEMORY_GROWTH=1 -s TOTAL_STACK=32mb -s INITIAL_MEMORY=128mb")
+  set(EM_FLAGS "-s FULL_ES2=1 -s FULL_ES3=1 -s USE_SDL=2 -s WASM=1 -s ENVIRONMENT=web -s ALLOW_MEMORY_GROWTH=1 -s TOTAL_STACK=32mb -s INITIAL_MEMORY=128mb -s OFFSCREEN_FRAMEBUFFER=1")
   target_link_options(${PROJECT_NAME} PUBLIC ${EM_FLAGS})
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EM_FLAGS}")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EM_FLAGS}")
@@ -102,6 +106,5 @@ if(ISEM)
   message(STATUS " * Emscripten building html")
 
   #add dockerfile and other files
-  file(COPY resources/Dockerfile DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
   file(COPY resources/index.html DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 endif()
