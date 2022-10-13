@@ -141,7 +141,9 @@ static int BufferResizeCallback(ImGuiInputTextCallbackData* data)
     if (data->EventFlag == ImGuiInputTextFlags_CallbackResize)
     {
         std::string* buf = (std::string*)data->UserData;
-        buf->resize(data->BufTextLen + 1000);
+        buf->resize(data->BufTextLen * 2);
+        data->BufTextLen = buf->capacity();
+        data->BufDirty = true;
         return 0;
     }
     return 1;
