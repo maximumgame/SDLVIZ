@@ -15,5 +15,15 @@ Implements uniforms iTime and iResolution in the same format as https://shaderto
 > Windows: ``cmake --build . --config Debug -j``
 
 ### Vcpkg notes:
-Support for ``VCPKG_ROOT`` enviroment variable is built in. Specifing the vcpkg cmake file is not required if this variable is set.
+Support for ``VCPKG_ROOT`` enviroment variable is built in. Specifing the vcpkg cmake file is not required if this environment variable is set.
 
+## Docker wasm
+SDLVIZ has an emscripten target
+
+You can use the included Dockerfile to build a webserver and try it out
+
+    docker build -t sdlviz-wasm -f resources/Dockerfile .
+
+    docker run --rm -p 8080:80 sdlviz-wasm
+
+And view it at ``http://localhost:8080``
